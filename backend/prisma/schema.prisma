@@ -29,3 +29,10 @@ model Beneficiary {
   orderId   String
   order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}

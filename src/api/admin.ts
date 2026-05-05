@@ -7,6 +7,11 @@ export const adminLogin = async (username: string, password: string) => {
   return response.data;
 };
 
+export const adminSignup = async (username: string, password: string) => {
+  const response = await axios.post(`${API_URL}/admin/signup`, { username, password });
+  return response.data;
+};
+
 export const getOrders = async (token: string) => {
   const response = await axios.get(`${API_URL}/admin/orders`, {
     headers: { Authorization: `Bearer ${token}` }

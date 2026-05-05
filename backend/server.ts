@@ -34,25 +34,70 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// ADMIN ROUTES (Simple Auth for MVP)
-const ADMIN_TOKEN = "admin_secret_token_2026";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-app.post('/api/admin/login', (req, res) => {
-  const { username, password } = req.body;
-  if (username === 'admin' && password === 'gala2026') {
-    res.json({ token: ADMIN_TOKEN });
-  } else {
-    res.status(401).json({ error: 'Identifiants invalides' });
+// ADMIN ROUTES
+const JWT_SECRET = process.env.JWT_SECRET || "gala_asebem_super_secret_2026";
+
+app.post('/api/admin/signup', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    const existingAdmin = await prisma.admin.findUnique({ where: { username } });
+    if (existingAdmin) {
+      return res.status(400).json({ error: 'Cet utilisateur existe déjà' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newAdmin = await prisma.admin.create({
+      data: {
+        username,
+        password: hashedPassword,
+      }
+    });
+
+    res.status(201).json({ success: true, message: 'Administrateur créé avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors de la création du compte' });
+  }
+});
+
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    const admin = await prisma.admin.findUnique({ where: { username } });
+    if (!admin) {
+      return res.status(401).json({ error: 'Identifiants invalides' });
+    }
+
+    const isValid = await bcrypt.compare(password, admin.password);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Identifiants invalides' });
+    }
+
+    const token = jwt.sign({ adminId: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '24h' });
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors de la connexion' });
   }
 });
 
 // Middleware for Admin Auth
 const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
   const authHeader = req.headers.authorization;
-  if (authHeader === `Bearer ${ADMIN_TOKEN}`) {
-    next();
-  } else {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Non autorisé' });
+    return;
+  }
+  
+  const token = authHeader.split(' ')[1];
+  try {
+    jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(401).json({ error: 'Session expirée ou invalide' });
   }
 };
 
