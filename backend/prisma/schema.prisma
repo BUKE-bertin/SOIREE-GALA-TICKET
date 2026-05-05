@@ -16,6 +16,7 @@ model Order {
   idAsebem        String
   pack            String
   nombrePersonnes Int
+  status          String        @default("EN_ATTENTE")
   createdAt       DateTime      @default(now())
   beneficiaires   Beneficiary[]
 }

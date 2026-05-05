@@ -34,6 +34,54 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
+// ADMIN ROUTES (Simple Auth for MVP)
+const ADMIN_TOKEN = "admin_secret_token_2026";
+
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === 'admin' && password === 'gala2026') {
+    res.json({ token: ADMIN_TOKEN });
+  } else {
+    res.status(401).json({ error: 'Identifiants invalides' });
+  }
+});
+
+// Middleware for Admin Auth
+const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  const authHeader = req.headers.authorization;
+  if (authHeader === `Bearer ${ADMIN_TOKEN}`) {
+    next();
+  } else {
+    res.status(401).json({ error: 'Non autorisé' });
+  }
+};
+
+app.get('/api/admin/orders', requireAdmin, async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      include: { beneficiaires: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+app.patch('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: { status }
+    });
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update order' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

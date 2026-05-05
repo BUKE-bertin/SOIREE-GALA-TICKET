@@ -3,7 +3,8 @@ import { OrderProvider } from './context/OrderContext';
 import { PackSelection } from './pages/PackSelection';
 import { OrderForm } from './pages/OrderForm';
 import { Confirmation } from './pages/Confirmation';
-
+import { AdminLogin } from './pages/AdminLogin';
+import { AdminDashboard } from './pages/AdminDashboard';
 type Step = 'selection' | 'form' | 'confirmation';
 
 function AppContent() {
@@ -53,7 +54,36 @@ function AppContent() {
   );
 }
 
+
+function AdminSection() {
+  const [token, setToken] = useState<string | null>(localStorage.getItem('adminToken'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    setToken(null);
+  };
+
+  return (
+    <div className="min-h-screen text-slate-200 selection:bg-gala-gold/30 selection:text-white relative bg-fixed bg-cover bg-center" style={{ backgroundColor: '#0A0A0A' }}>
+      <div className="fixed inset-0 bg-black/80 pointer-events-none" />
+      <main className="relative z-10">
+        {!token ? (
+          <AdminLogin onLogin={setToken} />
+        ) : (
+          <AdminDashboard token={token} onLogout={handleLogout} />
+        )}
+      </main>
+    </div>
+  );
+}
+
 function App() {
+  const isAdminPath = window.location.pathname === '/admin';
+
+  if (isAdminPath) {
+    return <AdminSection />;
+  }
+
   return (
     <OrderProvider>
       <AppContent />
