@@ -42,6 +42,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       await updateOrderStatus(token, orderId, newStatus);
+      if (newStatus === 'VALIDE') {
+        alert("Commande validée ! L'email contenant le billet a été envoyé à l'utilisateur.");
+      } else if (newStatus === 'ANNULE') {
+        alert("Commande annulée de manière irréversible.");
+      }
       fetchOrders();
     } catch (err) {
       alert('Erreur lors de la mise à jour du statut');
@@ -84,25 +89,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token, onLogout 
                   <p className="text-xs">Date: {new Date(order.createdAt).toLocaleString('fr-FR')}</p>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-2">
-                {order.status !== 'VALIDE' && (
-                  <Button 
+
+              {order.status !== 'VALIDE' && order.status !== 'ANNULE' && (
+                <div className="flex items-center gap-2">
+                  <Button
                     onClick={() => handleStatusChange(order.id, 'VALIDE')}
                     className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
                   >
                     Valider
                   </Button>
-                )}
-                {order.status !== 'ANNULE' && (
-                  <Button 
+                  <Button
                     onClick={() => handleStatusChange(order.id, 'ANNULE')}
                     className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30"
                   >
                     Annuler
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           ))}
           {orders.length === 0 && (
