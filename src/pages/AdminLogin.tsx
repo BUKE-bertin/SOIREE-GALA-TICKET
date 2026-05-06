@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { adminLogin, adminSignup } from '../api/admin';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
-import { Lock, UserPlus } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 interface AdminLoginProps {
   onLogin: (token: string) => void;
@@ -23,19 +23,14 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
     setLoading(true);
     
     try {
-      if (isSignup) {
-        await adminSignup(username, password);
-        setSuccess('Compte créé ! Vous pouvez maintenant vous connecter.');
-        setIsSignup(false);
-        setPassword('');
-      } else {
-        const data = await adminLogin(username, password);
-        localStorage.setItem('adminToken', data.token);
-        onLogin(data.token);
-      }
+      const data = await adminLogin(username, password);
+      localStorage.setItem('adminToken', data.token);
+      onLogin(data.token);
+      setSuccess('Connexion reussie');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Une erreur est survenue');
-    } finally {
+    } 
+    finally {
       setLoading(false);
     }
   };
@@ -45,10 +40,10 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       <div className="glass-card p-8 rounded-3xl space-y-8 relative">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 bg-gala-gold/10 rounded-full flex items-center justify-center mx-auto">
-            {isSignup ? <UserPlus className="w-8 h-8 text-gala-gold" /> : <Lock className="w-8 h-8 text-gala-gold" />}
+            <Lock className="w-8 h-8 text-gala-gold" />
           </div>
           <h2 className="text-2xl font-serif text-white">
-            {isSignup ? 'Créer un compte Admin' : 'Connexion Admin'}
+            Connexion Admin
           </h2>
         </div>
 
@@ -79,23 +74,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
           />
           
           <Button type="submit" isLoading={loading} className="w-full bg-gradient-to-r from-[#C5A059] via-[#D4AF37] to-[#C5A059] text-black font-bold border-0">
-            {isSignup ? "S'inscrire" : "Se connecter"}
+            {"Se connecter"}
           </Button>
         </form>
-
-        <div className="text-center pt-4">
-          <button 
-            type="button"
-            onClick={() => {
-              setIsSignup(!isSignup);
-              setError('');
-              setSuccess('');
-            }}
-            className="text-sm text-gala-gold hover:text-white transition-colors underline"
-          >
-            {isSignup ? "J'ai déjà un compte, me connecter" : "Je n'ai pas de compte, m'inscrire"}
-          </button>
-        </div>
       </div>
     </div>
   );

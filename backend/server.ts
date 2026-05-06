@@ -115,10 +115,10 @@ app.get('/api/admin/orders', requireAdmin, async (req, res) => {
 
 app.patch('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
     const { status } = req.body;
     const updatedOrder = await prisma.order.update({
-      where: { id },
+      where: { id } as { id: string },
       data: { status }
     });
     res.json(updatedOrder);
@@ -131,3 +131,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
