@@ -118,8 +118,8 @@ app.patch('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const updatedOrder = await prisma.order.update({
-      where: { id },
-      data: { status }
+      where: { id: String(id) },
+      data: { status: String(status) }
     });
     res.json(updatedOrder);
   } catch (error) {
