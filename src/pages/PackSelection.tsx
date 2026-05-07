@@ -3,7 +3,7 @@ import { PACKS, type Pack } from '../models';
 import { PackCard } from '../components/PackCard';
 import { useOrder } from '../context/OrderContext';
 import { Button } from '../components/ui/Button';
-import { Ticket, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface PackSelectionProps {
   onNext: () => void;

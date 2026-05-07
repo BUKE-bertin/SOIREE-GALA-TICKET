@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useOrder } from '../context/OrderContext';
 import { Button } from '../components/ui/Button';
-import { CheckCircle2, Download, Home, Mail, QrCode } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { CheckCircle2, Home, Mail, QrCode } from 'lucide-react';
 import { TicketDesign } from '../components/TicketDesign';
 
 interface ConfirmationProps {
@@ -12,32 +11,9 @@ interface ConfirmationProps {
 export const Confirmation: React.FC<ConfirmationProps> = ({ onReset }) => {
   const { orderResult, lastOrderData } = useOrder();
   const ticketRef = useRef<HTMLDivElement>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
+
 
   if (!lastOrderData) return null;
-
-  const handleDownload = async () => {
-    if (!ticketRef.current) return;
-    try {
-      setIsDownloading(true);
-
-      // We need to make sure the element is rendered properly before capturing
-      // Sometimes fonts or images take a bit to load, but here it should be fine
-      const dataUrl = await toPng(ticketRef.current, {
-        cacheBust: true,
-        pixelRatio: 2, // High quality
-      });
-
-      const link = document.createElement('a');
-      link.download = `Billet_Gala_${lastOrderData.nom}_${lastOrderData.prenom}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error('Failed to download ticket', err);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 md:py-20 text-center">
